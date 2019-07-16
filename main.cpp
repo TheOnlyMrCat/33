@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 		if (ifs->fail()) {
 			delete ifs;
 			std::cerr << "Could not open file \"" << options["file"].as<std::string>() << "\"" << std::endl;
-			exit(EXIT_FAILURE);
+			return EXIT_FAILURE;
 		}
 		inputStack.push(new fsinput(ifs));
 	} else {
@@ -131,11 +131,10 @@ int main(int argc, char *argv[])
 	//Declaration of interpreter variables
 	//- Data about position and token
 	char c = in->get();
-	
 	int line = 1, col = 1;
-	std::stack<std::pair<int, int>> locStack;
 	
-//	std::stack<std::pair<int, int>> loopStack;
+	std::stack<std::pair<int, int>> locStack;
+	std::stack<std::pair<std::string, std::pair<int, int>>> loopStack;
 	
 	//Memory
 	std::unordered_map<std::string, int> memory;
@@ -188,7 +187,7 @@ int main(int argc, char *argv[])
 					counter += c - 48;
 					break;
 					
-				//Printing
+				//Output
 				case 'p': // Prints the current value of stringSrc
 					std::cout << stringSrc << std::flush;
 					break;
@@ -405,17 +404,36 @@ int main(int argc, char *argv[])
 					
 				//Flow control
 				case '[':
-//					loopStack.push(std::pair<int, int>(line, col));
+					{
+						std::string lpdata;
+						std::pair<int, int> location = std::make_pair(line, col);
+						while (c != ']') {
+							c = in->get();
+							col++;
+							lpdata += c;
+						}
+						locStack.push(std::make_pair(line, col));
+						loopStack.push(std::make_pair(lpdata, location));
+						inputStack.push(new fninput(lpdata));
+					}
 					break;
 				case ']':
-					error(line, col, "Unmatched closing bracket");
+					if (loopStack.empty()) error(line, col, "Unmatched closing bracket");
+					if (accumulator != 0) {
+						inputStack.push(new fninput(loopStack.top().first));
+						locStack.push(std::make_pair(line, col));
+						line = loopStack.top().second.first;
+						col = loopStack.top().second.second;
+					} else {
+						loopStack.pop();
+					}
 					break;
 				case '{':
 					{
 						c = in->get();
 						col++;
 						std::string fndata;
-						std::pair<int, int> location = std::make_pair(line, col - 1 /*Can someone tell me why I need to subtract 1?*/);
+						std::pair<int, int> location = std::make_pair(line, col - 1);
 						while (c != '}') {
 							fndata += c;
 							c = in->get();
@@ -427,42 +445,52 @@ int main(int argc, char *argv[])
 				case '}':
 					error(line, col, "Unmatched closing brace");
 					break;
-				case 'n':
+				case 'n': // acc == 0
 					if (accumulator != 0) {
 						c = in->get();
 						col++;
 					}
 					break;
-				case 'b':
+				case 'N': // acc != 0
 					if (accumulator == 0) {
 						c = in->get();
 						col++;
 					}
 					break;
-				case 'g':
+				case 'g': // acc > 0
 					if (accumulator <= 0) {
 						c = in->get();
 						col++;
 					}
 					break;
-				case 'h':
+				case 'G': // acc <= 0 (!<)
+					if (accumulator > 0) {
+						c = in->get();
+						col++;
+					}
+					break;
+				case 'h': // acc < 0
 					if (accumulator >= 0) {
 						c = in->get();
 						col++;
 					}
 					break;
+				case 'H': // acc >= 0 (!>)
+					if (accumulator < 0) {
+						c = in->get();
+						col++;
+					}
+					break;
 				case 'q':
-					{
-						try {
-							auto f = functions.at(stringSrc);
-							inputStack.push(new fninput(f.first));
-							locStack.push(std::make_pair(line, col));
-							
-							line = f.second.first;
-							col = f.second.second;
-						} catch (std::out_of_range) {
-							error(line, col, "No function with specified name");
-						}
+					try {
+						auto f = functions.at(stringSrc);
+						inputStack.push(new fninput(f.first));
+						locStack.push(std::make_pair(line, col));
+						
+						line = f.second.first;
+						col = f.second.second;
+					} catch (std::out_of_range) {
+						error(line, col, "No function with specified name");
 					}
 					break;
 				
