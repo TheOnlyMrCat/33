@@ -78,12 +78,11 @@ public:
 	}
 };
 
-template <int size>
 class fninput : public input {
-	std::array<char, size> function;
+	std::string function;
 	int pointer = 0;
 public:
-	fninput(std::string data) : function(data.c_str()) {}
+	fninput(std::string data) : function(data) {}
 	
 	char get() override
 	{
@@ -92,7 +91,7 @@ public:
 	
 	bool good() override
 	{
-		return pointer < size;
+		return pointer < function.length();
 	}
 };
 
@@ -132,12 +131,15 @@ int main(int argc, char *argv[])
 	//Declaration of interpreter variables
 	//- Data about position and token
 	char c = in->get();
+	
 	int line = 1, col = 1;
-	std::stack<std::pair<int, int>> loopStack;
+	std::stack<std::pair<int, int>> locStack;
+	
+//	std::stack<std::pair<int, int>> loopStack;
 	
 	//Memory
 	std::unordered_map<std::string, int> memory;
-	std::unordered_map<std::string, std::string> functions;
+	std::unordered_map<std::string, std::pair<std::string, std::pair<int, int>>> functions;
 	
 	//"Registers"
 	int accumulator = 0;
@@ -353,14 +355,14 @@ int main(int argc, char *argv[])
 							default:
 								buffer += c;
 						}
-					} while (c != '"' && in->good());
+					} while (c != '\'' && in->good());
 					stringDest = buffer;
 				}
 					break;
 				case 't': // Swaps stringSrc and stringDest
 					{
 						std::string temp = stringSrc;
-						stringSrc = stringSrc;
+						stringSrc = stringDest;
 						stringDest = temp;
 					}
 					break;
@@ -394,20 +396,27 @@ int main(int argc, char *argv[])
 					
 				//Flow control
 				case '[':
-					loopStack.push(std::pair<int, int>(line, col));
+//					loopStack.push(std::pair<int, int>(line, col));
 					break;
 				case ']':
-					
+					error(line, col, "Unmatched closing bracket");
 					break;
 				case '{':
 					{
+						c = in->get();
+						col++;
 						std::string fndata;
+						std::pair<int, int> location = std::make_pair(line, col - 1 /*Can someone tell me why I need to subtract 1?*/);
 						while (c != '}') {
 							fndata += c;
 							c = in->get();
 							col++;
 						}
+						functions[stringDest] = std::make_pair(fndata, location);
 					}
+					break;
+				case '}':
+					error(line, col, "Unmatched closing brace");
 					break;
 				case 'n':
 					if (accumulator != 0) {
@@ -434,7 +443,19 @@ int main(int argc, char *argv[])
 					}
 					break;
 				case 'q':
-					break; //TODO Call method??
+					{
+						try {
+							auto f = functions.at(stringSrc);
+							inputStack.push(new fninput(f.first));
+							locStack.push(std::make_pair(line, col));
+							
+							line = f.second.first;
+							col = f.second.second;
+						} catch (std::out_of_range) {
+							error(line, col, "No function with specified name");
+						}
+					}
+					break;
 				
 				//Miscellaneous
 				case '(':
@@ -452,6 +473,10 @@ int main(int argc, char *argv[])
 			if (!in->good()) {
 				delete in;
 				inputStack.pop();
+				std::pair<int, int> newLoc = locStack.top();
+				line = newLoc.first;
+				col = newLoc.second;
+				locStack.pop();
 			}
 			c = in->get();
 			col++;
