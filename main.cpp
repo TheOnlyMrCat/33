@@ -150,6 +150,15 @@ int main(int argc, char *argv[])
 	
 	try {
 		while (!inputStack.empty()) {
+			if (!in->good()) {
+				delete in;
+				inputStack.pop();
+				if (inputStack.empty()) break;
+				std::pair<int, int> newLoc = locStack.top();
+				line = newLoc.first;
+				col = newLoc.second;
+				locStack.pop();
+			}
 			switch (c) {
 				//Memory storage
 				case 's': // Stores the accumulator into the location specified by stringDest
@@ -469,14 +478,6 @@ int main(int argc, char *argv[])
 					break;
 				default:
 					error(line, col, "Unrecognised token");
-			}
-			if (!in->good()) {
-				delete in;
-				inputStack.pop();
-				std::pair<int, int> newLoc = locStack.top();
-				line = newLoc.first;
-				col = newLoc.second;
-				locStack.pop();
 			}
 			c = in->get();
 			col++;
