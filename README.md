@@ -11,6 +11,9 @@ There are 3 output commands:
 * `o`: Prints the value in the accumulator to standard output
 * `i`: Prints a newline
 
+## Input
+There is currently no way to get user input.
+
 ## Memory
 There are 2 integer memory registers, a general integer memory, two string memory registers, and *(unimplemented)* 2 list memory registers.
 
@@ -38,7 +41,7 @@ The general memory is accessed via strings.
 
 ### Strings
 There are two string registers, a source, and a destination. Their functions are described in other sections. The source is set by
-enclosing a string in double quotes (`""`), and the destination by single quotes (`''`). They are swapped by the operation `t`
+enclosing a string in double quotes (`""`), and the destination by single quotes (`''`). They are swapped by the operation `t`.
 
 ### Lists
 *To be added*
@@ -46,9 +49,30 @@ enclosing a string in double quotes (`""`), and the destination by single quotes
 ## Flow control
 ### Conditionals
 Conditional operators skip the next operation if the condition is not met.
-* `n`: Performs the next operation if the accumulator is 0
-* `N`: Performs the next operation if the accumulator is not 0
-* `g`: Performs the next operation if the accumulator is greater than 0
-* `G`: Performs the next operation if the accumulator is not greater than 0 (i.e. less than or equal to 0)
-* `h`: Performs the next operation if the accumulator is less than 0
-* `H`: Performs the next operation if the accumulator is not less than 0 (i.e. greater than or equal to 0)
+* `n`: Performs the next operation if the accumulator is 0.
+* `N`: Performs the next operation if the accumulator is not 0.
+* `g`: Performs the next operation if the accumulator is greater than 0.
+* `G`: Performs the next operation if the accumulator is not greater than 0 (i.e. less than or equal to 0).
+* `h`: Performs the next operation if the accumulator is less than 0.
+* `H`: Performs the next operation if the accumulator is not less than 0 (i.e. greater than or equal to 0).
+
+### Functions
+Functions use the string registers to create and call. The destination register is queried when creating a function, and the source
+when calling. Creating a function is as simple as setting the destination register, then enclosing a block of code in braces, for
+example: `'Print'{"Hello, World!'p}`.
+
+To call a function, you must set the source register, then perform the `q` operation. Following on from the previous example, that
+would be: `"Print"q`.
+
+Register values are kept when changing stack frames. This means you can do stuff like this:
+
+```
+{"Hello"p}'Hello'{", "p}', '{"World"p}'World'{"!"pi}qqqq
+```
+
+to print "Hello, World!"
+
+### Loops
+Loops are notated using square brackets (`[]`). When a closing bracket is found, the code jumps back to the matching opening 
+bracket if the accumulator is not 0. For example: This code `10az1[oim]"Done."pi` will count down from 10 until it reaches 1,
+then it will print "Done.". To make it count down until it reaches 0, this code would be used: `11az1[moi]"Done."pi`.
