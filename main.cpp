@@ -83,7 +83,7 @@ class fninput : public input {
 	std::array<char, size> function;
 	int pointer = 0;
 public:
-	fninput(std::array<char, size> data) : function(data) {}
+	fninput(std::string data) : function(data.c_str()) {}
 	
 	char get() override
 	{
@@ -99,7 +99,7 @@ public:
 void error(int line, int col, std::string msg)
 {
 	std::cerr << "Ska (" << line << ":" << col << "): " << msg << std::endl;
-	throw "your mum";
+	throw "this ball";
 }
 
 int main(int argc, char *argv[])
@@ -137,23 +137,23 @@ int main(int argc, char *argv[])
 	
 	//Memory
 	std::unordered_map<std::string, int> memory;
+	std::unordered_map<std::string, std::string> functions;
 	
 	//"Registers"
 	int accumulator = 0;
 	int counter = 0;
 	
 	std::string stringSrc;
-	std::string dtringDest;
+	std::string stringDest;
 	
 	try {
 		while (!inputStack.empty()) {
 			switch (c) {
 				//Memory storage
-				case 's':
-					if (stringSrc.length() < 1) error(line, col, "No string passed to store");
-					memory.emplace(stringSrc, accumulator);
+				case 's': // Stores the accumulator into the location specified by stringDest
+					memory.emplace(stringDest, accumulator);
 					break;
-				case 'l':
+				case 'l': // Loads the value at stringSrc into the accumulator
 					if (stringSrc.length() < 1) error(line, col, "No string passed to load");
 					try {
 						accumulator = memory.at(stringSrc);
@@ -163,33 +163,33 @@ int main(int argc, char *argv[])
 					break;
 				
 				//Numeric values
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
+				case '0': // Multiplies the counter by 10, then adds 0
+				case '1': // --------------------------------------- 1
+				case '2': // --------------------------------------- 2
+				case '3': // --------------------------------------- 3
+				case '4': // --------------------------------------- 4
+				case '5': // --------------------------------------- 5
+				case '6': // --------------------------------------- 6
+				case '7': // --------------------------------------- 7
+				case '8': // --------------------------------------- 8
+				case '9': // --------------------------------------- 9
 					counter *= 10;
 					counter += c - 48;
 					break;
 					
 				//Printing
-				case 'p':
+				case 'p': // Prints the current value of stringSrc
 					std::cout << stringSrc << std::flush;
 					break;
-				case 'o':
+				case 'o': // Prints the current value of the accumulator
 					std::cout << accumulator << std::flush;
 					break;
-				case 'i':
+				case 'i': // Prints a newline
 					std::cout << std::endl;
 					break;
 				
 				//Strings
-				case '"':
+				case '"': // Loads a string into stringSrc
 					{
 						std::string buffer;
 						do {
@@ -273,6 +273,97 @@ int main(int argc, char *argv[])
 						stringSrc = buffer;
 					}
 					break;
+				case '\'': // Loads a string into stringDest
+					{
+					std::string buffer;
+					do {
+						c = in->get();
+						col++;
+						switch (c) {
+							case '\\':
+								c = in->get();
+								col++;
+								switch (c) {
+									case 'a':
+										buffer += '\a';
+										break;
+									case 'b':
+										buffer += '\b';
+										break;
+									case 'e':
+										buffer += '\e';
+										break;
+									case 'f':
+										buffer += '\f';
+										break;
+									case 'n':
+										buffer += '\n';
+										break;
+									case 'r':
+										buffer += '\r';
+										break;
+									case 't':
+										buffer += '\t';
+										break;
+									case 'u':
+										try {
+											int unicode = stoi(std::string()+={in->get(), in->get(), in->get(), in->get()}, nullptr, 16);
+											std::string utf8 = UnicodeToUTF8(unicode);
+											buffer += utf8;
+										} catch (std::invalid_argument) {
+											error(line, col, "Invalid hexadecimal value for \\u");
+										}
+										col += 4;
+										break;
+									case 'U':
+										try {
+											int unicode = stoi(std::string()+={in->get(), in->get(), in->get(), in->get(), in->get(), in->get(), in->get(), in->get()}, nullptr, 16);
+											std::string utf8 = UnicodeToUTF8(unicode);
+											buffer+= utf8;
+										} catch (std::invalid_argument) {
+											error(line, col, "Invalid hexadecimal value for \\U");
+										}
+										col += 8;
+										break;
+									case 'v':
+										buffer += '\v';
+										break;
+									case 'x':
+										try {
+											int unicode = stoi(std::string()+={in->get(), in->get()}, nullptr, 16);
+											std::string utf8 = UnicodeToUTF8(unicode);
+											buffer += utf8;
+										} catch (std::invalid_argument) {
+											error(line, col, "Invalid hexadecimal value for \\x");
+										}
+										col += 2;
+										break;
+									case '\\':
+										buffer += '\\';
+										break;
+									case '\'':
+										buffer += '\'';
+										break;
+									default:
+										error(line, col, "Invalid escape sequence");
+								}
+								break;
+							case '\'':
+								break;
+							default:
+								buffer += c;
+						}
+					} while (c != '"' && in->good());
+					stringDest = buffer;
+				}
+					break;
+				case 't': // Swaps stringSrc and stringDest
+					{
+						std::string temp = stringSrc;
+						stringSrc = stringSrc;
+						stringDest = temp;
+					}
+					break;
 					
 				//Arithmetic
 				case 'a':
@@ -307,6 +398,16 @@ int main(int argc, char *argv[])
 					break;
 				case ']':
 					
+					break;
+				case '{':
+					{
+						std::string fndata;
+						while (c != '}') {
+							fndata += c;
+							c = in->get();
+							col++;
+						}
+					}
 					break;
 				case 'n':
 					if (accumulator != 0) {
@@ -348,11 +449,17 @@ int main(int argc, char *argv[])
 				default:
 					error(line, col, "Unrecognised token");
 			}
-			if (!in->good()) inputStack.pop();
+			if (!in->good()) {
+				delete in;
+				inputStack.pop();
+			}
 			c = in->get();
 			col++;
 		}
 	} catch (const char*) {}
 	
-	delete in;
+	while (!inputStack.empty()) {
+		delete in;
+		inputStack.pop();
+	}
 }
