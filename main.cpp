@@ -8,6 +8,8 @@
 
 #include "cxxopts.hpp"
 
+#include <cstdio>
+
 #include <fstream>
 #include <iostream>
 #include <stack>
@@ -106,11 +108,18 @@ int main(int argc, char *argv[])
 	cxxopts::Options parser = cxxopts::Options("Ska interpreter");
 	
 	parser.add_options()
-	("f,file", "Name of the file to be run", cxxopts::value<std::string>())
+	("d,debug", "Debug mode (for devs (if you're not a dev don't touch this (by touch I do mean use)))")
+	("f,file", "Name of the file to be run", cxxopts::value<std::string>(), "filename")
 	("e,explain", "Prints an explanation of the program to the standard output")
+	("h,help", "Shows a help message")
 	;
 	
 	auto options = parser.parse(argc, argv);
+	
+	if (options.count("help")) {
+		std::cout << parser.help();
+		return EXIT_SUCCESS;
+	}
 	
 	std::stack<input*> inputStack;
 	
@@ -125,6 +134,8 @@ int main(int argc, char *argv[])
 	} else {
 		inputStack.push(new cinput());
 	}
+	
+	bool DEBUGF = options.count("debug");
 	
 #define in inputStack.top()
 	
@@ -161,10 +172,9 @@ int main(int argc, char *argv[])
 			switch (c) {
 				//Memory storage
 				case 's': // Stores the accumulator into the location specified by stringDest
-					memory.emplace(stringDest, accumulator);
+					memory[stringDest] = accumulator;
 					break;
 				case 'l': // Loads the value at stringSrc into the accumulator
-					if (stringSrc.length() < 1) error(line, col, "No string passed to load");
 					try {
 						accumulator = memory.at(stringSrc);
 					} catch (std::out_of_range) {
@@ -276,6 +286,8 @@ int main(int argc, char *argv[])
 									break;
 								case '"':
 									break;
+								case '\n':
+									error(line, col, "Linefeed in string literal");
 								default:
 									buffer += c;
 							}
@@ -360,6 +372,8 @@ int main(int argc, char *argv[])
 								break;
 							case '\'':
 								break;
+							case '\n':
+								error(line, col, "Linefeed in string literal");
 							default:
 								buffer += c;
 						}
@@ -409,12 +423,19 @@ int main(int argc, char *argv[])
 						std::pair<int, int> location = std::make_pair(line, col);
 						while (c != ']') {
 							c = in->get();
+							if (c == '\n') {
+								line++;
+								col = 0;
+							}
 							col++;
 							lpdata += c;
 						}
 						locStack.push(std::make_pair(line, col));
 						loopStack.push(std::make_pair(lpdata, location));
 						inputStack.push(new fninput(lpdata));
+						
+						line = location.first;
+						col = location.second;
 					}
 					break;
 				case ']':
@@ -430,6 +451,7 @@ int main(int argc, char *argv[])
 					break;
 				case '{':
 					{
+						if (functions.count(stringDest)) error(line, col, "Function declared twice");
 						c = in->get();
 						col++;
 						std::string fndata;
@@ -447,7 +469,7 @@ int main(int argc, char *argv[])
 					break;
 				case 'n': // acc == 0
 					if (accumulator != 0) {
-						c = in->get();
+						in->get();
 						col++;
 					}
 					break;
@@ -496,8 +518,15 @@ int main(int argc, char *argv[])
 				
 				//Miscellaneous
 				case '(':
-					while ((c = in->get()) != ')') col++;
+					while ((c = in->get()) != ')') {
+						if (c == '\n') {
+							line++;
+							col = 0;
+						}
+						col++;
+					}
 					break;
+				case '\t':
 				case ' ':
 					break;
 				case '\n':
@@ -506,6 +535,13 @@ int main(int argc, char *argv[])
 					break;
 				default:
 					error(line, col, "Unrecognised token");
+			}
+			if (DEBUGF && c != '\n' && c != ' ' && c != '\t') {
+				printf("Character: %c\nAcc   Cou   \n%5d %5d\nSrc: \"%s\"\nDest: \"%s\"\nGeneral memory:\n", c, accumulator, counter, stringSrc.c_str(), stringDest.c_str());
+				for (auto pair : memory) {
+					printf("\t\"%s\": %d\n", pair.first.c_str(), pair.second);
+				}
+				std::cin.get();
 			}
 			c = in->get();
 			col++;

@@ -26,7 +26,7 @@ The general memory is accessed via strings.
 
 #### Arithmetic operations
 
-* `0-9`: Multiplies the counter by 10, then adds itself. For example: `50o7o` will output `50507`
+* `0-9`: Multiplies the counter by 10, then adds itself. For example: `50coc7co` will output `50507`
 * `a`: Adds the counter to the accumulator
 * `m`: Subtracts the counter from the accumulator
 * `x`: Multiplies the accumulator by the counter
