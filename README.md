@@ -4,6 +4,10 @@ Ska is an esolang created to use letter characters instead of the strange symbol
 symbols, such as [] for loops, {} for functions, and "" and '' for strings, but they're more standard than the stuff some other
 esolangs use.
 
+## Installation
+I am unable to make binaries for the interpreter at this point, so to use this you'll have to get `main.cpp` and `cxxopts.hpp`.
+Compile using C++17.
+
 ## Output
 There are 3 output commands:
 
