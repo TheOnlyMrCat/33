@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	cxxopts::Options parser = cxxopts::Options("Ska interpreter");
 	
 	parser.add_options()
-	("d,debug", "Debug mode (for devs (if you're not a dev don't touch this (by touch I do mean use)))")
+	("d,debug", "Enable debug mode")
 	("f,file", "Name of the file to be run", cxxopts::value<std::string>(), "filename")
 	("e,explain", "Prints an explanation of the program to the standard output")
 	("h,help", "Shows a help message")
@@ -142,21 +142,27 @@ int main(int argc, char *argv[])
 	//Declaration of interpreter variables
 	//- Data about position and token
 	char c = in->get();
-	int line = 1, col = 1;
+	unsigned int line = 1, col = 1;
 	
-	std::stack<std::pair<int, int>> locStack;
-	std::stack<std::pair<std::string, std::pair<int, int>>> loopStack;
+	std::stack<std::pair<unsigned int, unsigned int>> locStack;
+	std::stack<std::pair<std::string, std::pair<unsigned int, unsigned int>>> loopStack;
 	
 	//Memory
-	std::unordered_map<std::string, int> memory;
-	std::unordered_map<std::string, std::pair<std::string, std::pair<int, int>>> functions;
+	std::unordered_map<std::string, long> memory;
+	std::unordered_map<std::string, std::pair<std::string, std::pair<unsigned int, unsigned int>>> functions;
 	
 	//"Registers"
-	int accumulator = 0;
-	int counter = 0;
+	long accumulator = 0;
+	long counter = 0;
 	
 	std::string stringSrc;
 	std::string stringDest;
+	
+	std::vector<std::string> stringList(argc);
+	std::vector<std::string> listBackup;
+	for (int i = 0; i < argc; i++) {
+		stringList[i] = argv[i];
+	}
 	
 	try {
 		while (!inputStack.empty()) {
@@ -255,7 +261,7 @@ int main(int argc, char *argv[])
 											try {
 												int unicode = stoi(std::string()+={in->get(), in->get(), in->get(), in->get(), in->get(), in->get(), in->get(), in->get()}, nullptr, 16);
 												std::string utf8 = UnicodeToUTF8(unicode);
-												buffer+= utf8;
+												buffer += utf8;
 											} catch (std::invalid_argument) {
 												error(line, col, "Invalid hexadecimal value for \\U");
 											}
@@ -388,6 +394,65 @@ int main(int argc, char *argv[])
 						stringDest = temp;
 					}
 					break;
+				case 'j':
+					try {
+						accumulator = stringSrc[counter];
+					} catch (std::out_of_range) {
+						error(line, col, "String index out of range");
+					}
+					break;
+				case 'k':
+					while (stringDest.length() <= counter) {
+						stringDest += " ";
+					}
+					stringDest[counter] = accumulator;
+					break;
+				case 'e':
+					stringDest += stringSrc;
+					
+				//Lists
+				case 'w':
+					accumulator = stringList.size();
+					break;
+				case 'y':
+					{
+						size_t last = 0;
+						size_t next = 0;
+						while ((next = stringSrc.find(stringDest, last)) != std::string::npos) {
+							stringList.push_back(stringSrc.substr(last, next-last));
+							last = next + 1;
+						}
+						stringList.push_back(stringSrc.substr(last, stringSrc.length()));
+					}
+					break;
+				case 'v':
+					for (auto item : listBackup) {
+						stringList.push_back(item);
+					}
+					break;
+				case 'u':
+					{
+						std::vector<std::string> temp = stringList;
+						stringList = listBackup;
+						listBackup = temp;
+					}
+					break;
+				case 'b':
+					try {
+						stringDest = stringList[counter];
+					} catch (std::out_of_range) {
+						error(line, col, "List index out of range");
+					}
+					break;
+				case 'f':
+					while (stringList.size() <= counter) {
+						stringList.push_back("");
+					}
+					stringList[counter] = stringSrc;
+					break;
+				case 'Z':
+					stringList.erase(stringList.begin(), stringList.end());
+					break;
 					
 				//Arithmetic
 				case 'a':
@@ -410,7 +475,7 @@ int main(int argc, char *argv[])
 					break;
 				case 'c':
 					{
-						int temp = counter;
+						long temp = counter;
 						counter = accumulator;
 						accumulator = temp;
 					}
@@ -420,7 +485,7 @@ int main(int argc, char *argv[])
 				case '[':
 					{
 						std::string lpdata;
-						std::pair<int, int> location = std::make_pair(line, col);
+						std::pair<unsigned int, unsigned int> location = std::make_pair(line, col);
 						while (c != ']') {
 							c = in->get();
 							if (c == '\n') {
@@ -537,9 +602,12 @@ int main(int argc, char *argv[])
 					error(line, col, "Unrecognised token");
 			}
 			if (DEBUGF && c != '\n' && c != ' ' && c != '\t') {
-				printf("Character: %c\nAcc   Cou   \n%5d %5d\nSrc: \"%s\"\nDest: \"%s\"\nGeneral memory:\n", c, accumulator, counter, stringSrc.c_str(), stringDest.c_str());
+				printf("Character: %c\nAccum Count \n%5ld %5ld\nSrc: \"%s\"\nDest: \"%s\"\nList:\n", c, accumulator, counter, stringSrc.c_str(), stringDest.c_str());
+				for (std::string item : stringList) {
+					std::cout << '\t' << (item == "" ? "(Empty)" : item) << std::endl;
+				}
 				for (auto pair : memory) {
-					printf("\t\"%s\": %d\n", pair.first.c_str(), pair.second);
+					std::cout << "\t\"" << pair.first << "\": " << pair.second;
 				}
 				std::cin.get();
 			}
