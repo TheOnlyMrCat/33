@@ -4,15 +4,18 @@ Ska is an esolang created to use letter characters instead of the strange symbol
 symbols, such as [] for loops, {} for functions, and "" and '' for strings, but they're more standard than the stuff some other
 esolangs use.
 
-## Output
+## Input/Output
 There are 3 output commands:
 
 * `p`: Prints the string in the source string register to standard output
 * `o`: Prints the value in the accumulator to standard output
 * `i`: Prints a newline
 
-## Input
-There is currently no way to get user input.
+There are three input commands:
+
+* `P`: Sets the accumulator to the value of the next character read from stdin
+* `O`: Sets the accumulator to the next integer read from stdin
+* `I`: Sets the destination string to the next line read from stdin
 
 ## Memory
 There are 2 integer memory registers, a general integer memory, two string memory registers, and *(unimplemented)* 2 list memory registers.
@@ -51,6 +54,14 @@ enclosing a string in double quotes (`""`), and the destination by single quotes
 
 ### Lists
 There are two list registers. One that you can perform operations on, and one for simply storing a second list. The list is initially filled in with `argv`
+
+#### List operations
+* `b`: Sets the destination string to a string in the mutable list, specified by the counter
+* `f`: Sets a value in the mutable list, specified by the counter, to the source string
+* `u`: Swaps the mutable and backup lists
+* `v`: Appends the backup list to the mutable list
+* `y`: Sets the list to the value of the source string split by the value of the destination string
+* `Z`: Clears the mutable list
 
 ## Flow control
 ### Conditionals
@@ -95,6 +106,7 @@ then it will print "Done.". To make it count down until it reaches 0, this code 
 * `h`: Performs the next operation if the accumulator is less than 0.
 * `H`: Performs the next operation if the accumulator is not less than 0.
 * `i`: Prints a newline to standard output
+* `I`: Sets the destination string to the next line read from stdin
 * `j`: Sets the accumulator to the value of a character in the source string, referenced by the counter
 * `k`: Sets a character in the destination string, referenced by the counter, to the character represented by the value in the accumulator.
 * `l`: Loads the value in memory referenced by the source string register into the accumulator
@@ -102,7 +114,9 @@ then it will print "Done.". To make it count down until it reaches 0, this code 
 * `n`: Performs the next operation if the accumulator is equal to 0.
 * `N`: Performs the next operation if the accumulator is not equal to 0.
 * `o`: Prints the value of the accumulator to standard output
+* `O`: Sets the accumulator to the next integer input
 * `p`: Prints the string in the source string register to standard output
+* `P`: Sets the accumulator to the value of the next character read from stdin
 * `q`: Calls the function from the source string
 * `r`: Divides the accumulator by the counter but keeps the remainder
 * `s`: Stores the value of the accumulator in memory referenced by the destination string
@@ -111,6 +125,6 @@ then it will print "Done.". To make it count down until it reaches 0, this code 
 * `v`: Appends the backup list to the mutable list
 * `w`: Sets the accumulator to the length of the list
 * `x`: Multiplies the accumulator by the counter
-* `y`: Sets the list to the value of the source string split by the regex value in the destination string
+* `y`: Sets the list to the value of the source string split by the value of the destination string
 * `z`: Sets the counter to 0
 * `Z`: Clears the mutable list

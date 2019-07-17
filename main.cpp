@@ -110,7 +110,6 @@ int main(int argc, char *argv[])
 	parser.add_options()
 	("d,debug", "Enable debug mode")
 	("f,file", "Name of the file to be run", cxxopts::value<std::string>(), "filename")
-	("e,explain", "Prints an explanation of the program to the standard output")
 	("h,help", "Shows a help message")
 	;
 	
@@ -201,6 +200,21 @@ int main(int argc, char *argv[])
 				case '9': // --------------------------------------- 9
 					counter *= 10;
 					counter += c - 48;
+					break;
+					
+				//Input
+				case 'P':
+					{
+						char c;
+						std::cin >> c;
+						accumulator = c;
+					}
+					break;
+				case 'O':
+					std::cin >> accumulator;
+					break;
+				case 'I':
+					std::getline(std::cin, stringDest);
 					break;
 					
 				//Output
