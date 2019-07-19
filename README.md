@@ -5,8 +5,15 @@ symbols, such as [] for loops, {} for functions, and "" and '' for strings, but 
 esolangs use.
 
 ## Installation
-I am unable to make binaries for the interpreter at this point, so to use this you'll have to get `main.cpp` and `cxxopts.hpp`.
-Compile using C++17.
+Get the latest release from the [releases page](https://github.com/TheOnlyMrCat/ska/releases) of this repository. Put it on
+your $PATH if need be.
+
+## Running a program
+After installing the interpreter, execute it with `-f <filename>` to execute a file. Adding the `-d` flag will show a debugger.
+
+### The debugger
+The debugger allows you to step through the program, one instruction at a time, and see the internal values of the registers.
+It prints the values stored in the accumulator, counter, source string, destination string, and mutable list (in that order).
 
 ## Input/Output
 There are 3 output commands:

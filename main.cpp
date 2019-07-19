@@ -52,8 +52,9 @@ public:
 
 class fsinput : public input {
 	std::ifstream *stream;
+	std::string filename;
 public:
-	fsinput(std::ifstream *stream) : stream(stream) {}
+	fsinput(std::ifstream *stream, std::string filename) : stream(stream), filename(filename) {}
 	~fsinput() override {delete stream;}
 	
 	char get() override
@@ -129,7 +130,7 @@ int main(int argc, char *argv[])
 			std::cerr << "Could not open file \"" << options["file"].as<std::string>() << "\"" << std::endl;
 			return EXIT_FAILURE;
 		}
-		inputStack.push(new fsinput(ifs));
+		inputStack.push(new fsinput(ifs, options["file"].as<std::string>()));
 	} else {
 		inputStack.push(new cinput());
 	}
