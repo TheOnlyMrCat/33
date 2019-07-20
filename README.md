@@ -1,11 +1,11 @@
-#  Ska
+#  33
 
-Ska is an esolang created to use letter characters instead of the strange symbols other esolangs use. Yes, there are some
+33 is an esolang created to use letter characters instead of the strange symbols other esolangs use. Yes, there are some
 symbols, such as [] for loops, {} for functions, and "" and '' for strings, but they're more standard than the stuff some other
-esolangs use.
+esolangs use. There are 33 distinct letter commands in the language.
 
 ## Installation
-Get the latest release from the [releases page](https://github.com/TheOnlyMrCat/ska/releases) of this repository. Put it on
+Get the latest release from the [releases page](https://github.com/TheOnlyMrCat/33/releases) of this repository. Put it on
 your $PATH if need be.
 
 ## Running a program
@@ -104,6 +104,10 @@ to print "Hello, World!"
 Loops are notated using square brackets (`[]`). When a closing bracket is found, the code jumps back to the matching opening 
 bracket if the accumulator is not 0. For example: This code `10az1[oim]"Done."pi` will count down from 10 until it reaches 1,
 then it will print "Done.". To make it count down until it reaches 0, this code would be used: `11az1[moi]"Done."pi`.
+
+## Program termination
+When the program reaches the end of input, the interpreter terminates. No printing is done after this. The program can be
+terminated early with the `@` operator.
 
 ## Synopsis:
 * `a`: Adds the counter to the accumulator

@@ -52,9 +52,8 @@ public:
 
 class fsinput : public input {
 	std::ifstream *stream;
-	std::string filename;
 public:
-	fsinput(std::ifstream *stream, std::string filename) : stream(stream), filename(filename) {}
+	fsinput(std::ifstream *stream) : stream(stream) {}
 	~fsinput() override {delete stream;}
 	
 	char get() override
@@ -100,13 +99,13 @@ public:
 
 void error(int line, int col, std::string msg)
 {
-	std::cerr << "Ska (" << line << ":" << col << "): " << msg << std::endl;
+	std::cerr << "33 (" << line << ":" << col << "): " << msg << std::endl;
 	throw "this ball";
 }
 
 int main(int argc, char *argv[])
 {
-	cxxopts::Options parser = cxxopts::Options("Ska interpreter");
+	cxxopts::Options parser = cxxopts::Options("33 interpreter");
 	
 	parser.add_options()
 	("d,debug", "Enable debug mode")
@@ -130,7 +129,7 @@ int main(int argc, char *argv[])
 			std::cerr << "Could not open file \"" << options["file"].as<std::string>() << "\"" << std::endl;
 			return EXIT_FAILURE;
 		}
-		inputStack.push(new fsinput(ifs, options["file"].as<std::string>()));
+		inputStack.push(new fsinput(ifs));
 	} else {
 		inputStack.push(new cinput());
 	}
@@ -606,6 +605,8 @@ int main(int argc, char *argv[])
 						col++;
 					}
 					break;
+				case '@':
+					throw "some lullaby";
 				case '\t':
 				case ' ':
 					break;
