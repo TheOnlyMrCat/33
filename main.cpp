@@ -105,7 +105,7 @@ void error(int line, int col, std::string msg)
 
 int main(int argc, char *argv[])
 {
-	cxxopts::Options parser = cxxopts::Options("33 interpreter");
+	cxxopts::Options parser = cxxopts::Options("33");
 	
 	parser.add_options()
 	("d,debug", "Enable debug mode")
