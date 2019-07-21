@@ -429,15 +429,7 @@ int main(int argc, char *argv[])
 					accumulator = stringList.size();
 					break;
 				case 'y':
-					{
-						size_t last = 0;
-						size_t next = 0;
-						while ((next = stringSrc.find(stringDest, last)) != std::string::npos) {
-							stringList.push_back(stringSrc.substr(last, next-last));
-							last = next + 1;
-						}
-						stringList.push_back(stringSrc.substr(last, stringSrc.length()));
-					}
+					stringList.push_back(stringSrc);
 					break;
 				case 'v':
 					for (auto item : listBackup) {

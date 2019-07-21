@@ -29,7 +29,7 @@ There are three input commands:
 * `I`: Sets the destination string to the next line read from stdin
 
 ## Memory
-There are 2 integer memory registers, a general integer memory, two string memory registers, and *(unimplemented)* 2 list memory registers.
+There are 2 integer memory registers, a general integer memory, two string memory registers, and 2 list memory registers.
 
 ### Integers
 Of the two integer memory registers, the accumulator is the one that can have mathematical operations performed on it, the
@@ -71,7 +71,7 @@ There are two list registers. One that you can perform operations on, and one fo
 * `f`: Sets a value in the mutable list, specified by the counter, to the source string
 * `u`: Swaps the mutable and backup lists
 * `v`: Appends the backup list to the mutable list
-* `y`: Sets the list to the value of the source string split by the value of the destination string
+* `y`: Appends the source string to the mutable list
 * `Z`: Clears the mutable list
 
 ## Flow control
@@ -138,8 +138,8 @@ terminated early with the `@` operator.
 * `t`: Swaps the source and destination strings
 * `u`: Swaps the mutable and backup lists
 * `v`: Appends the backup list to the mutable list
-* `w`: Sets the accumulator to the length of the list
+* `w`: Sets the accumulator to the length of the mutable list
 * `x`: Multiplies the accumulator by the counter
-* `y`: Sets the list to the value of the source string split by the value of the destination string
+* `y`: Appends the source string to the mutable list
 * `z`: Sets the counter to 0
 * `Z`: Clears the mutable list
