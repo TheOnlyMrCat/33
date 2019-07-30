@@ -71,6 +71,7 @@ There are two list registers. One that you can perform operations on, and one fo
 * `f`: Sets a value in the mutable list, specified by the counter, to the source string
 * `u`: Swaps the mutable and backup lists
 * `v`: Appends the backup list to the mutable list
+* `w`: Sets the accumulator to the length of the mutable list
 * `y`: Appends the source string to the mutable list
 * `Z`: Clears the mutable list
 

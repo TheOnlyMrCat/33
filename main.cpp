@@ -410,9 +410,9 @@ int main(int argc, char *argv[])
 					break;
 				case 'j':
 					try {
-						accumulator = stringSrc[counter];
+						accumulator = stringSrc.at(counter);
 					} catch (std::out_of_range) {
-						error(line, col, "String index out of range");
+						accumulator = 0;
 					}
 					break;
 				case 'k':
@@ -445,9 +445,9 @@ int main(int argc, char *argv[])
 					break;
 				case 'b':
 					try {
-						stringDest = stringList[counter];
+						stringDest = stringList.at(counter);
 					} catch (std::out_of_range) {
-						error(line, col, "List index out of range");
+						stringDest = "";
 					}
 					break;
 				case 'f':
