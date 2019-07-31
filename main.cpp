@@ -423,6 +423,7 @@ int main(int argc, char *argv[])
 					break;
 				case 'e':
 					stringDest += stringSrc;
+					break;
 					
 				//Lists
 				case 'w':
@@ -614,6 +615,7 @@ int main(int argc, char *argv[])
 				for (std::string item : stringList) {
 					std::cout << '\t' << (item == "" ? "(Empty)" : item) << std::endl;
 				}
+				std::cout << "Memory:" << std::endl;
 				for (auto pair : memory) {
 					std::cout << "\t\"" << pair.first << "\": " << pair.second;
 				}
