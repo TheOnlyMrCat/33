@@ -110,7 +110,9 @@ int main(int argc, char *argv[])
 	parser.add_options()
 	("d,debug", "Enable debug mode")
 	("f,file", "Name of the file to be run", cxxopts::value<std::string>(), "filename")
-	("h,help", "Shows a help message")
+	("c,command", "Program ro run", cxxopts::value<std::string>(), "program")
+	("console", "Take input from console (legacy)")
+	("h,help", "Shows this help message")
 	;
 	
 	auto options = parser.parse(argc, argv);
@@ -130,8 +132,13 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 		inputStack.push(new fsinput(ifs));
-	} else {
+	} else if (options.count("command")) {
+		inputStack.push(new fninput(options["command"].as<std::string>() + (char) EOF));
+	} else if (options.count("console")) {
 		inputStack.push(new cinput());
+	} else {
+		std::cout << parser.help();
+		return EXIT_SUCCESS;
 	}
 	
 	bool DEBUGF = options.count("debug");
@@ -162,6 +169,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < argc; i++) {
 		stringList[i] = argv[i];
 	}
+	stringList[0] = "33";
 	
 	try {
 		while (!inputStack.empty()) {
@@ -174,6 +182,11 @@ int main(int argc, char *argv[])
 				col = newLoc.second;
 				locStack.pop();
 			}
+			
+			if (DEBUGF) {
+				std::cout << "Character: " << c << std::endl;
+			}
+			
 			switch (c) {
 				//Memory storage
 				case 's': // Stores the accumulator into the location specified by stringDest
@@ -219,13 +232,21 @@ int main(int argc, char *argv[])
 					
 				//Output
 				case 'p': // Prints the current value of stringSrc
-					std::cout << stringSrc << std::flush;
+					if (DEBUGF) {
+						std::cout << "Output: " << stringSrc << std::endl;
+					} else {
+						std::cout << stringSrc << std::flush;
+					}
 					break;
 				case 'o': // Prints the current value of the accumulator
-					std::cout << accumulator << std::flush;
+					if (DEBUGF) {
+						std::cout << "Output: " << stringSrc << std::endl;
+					} else {
+						std::cout << accumulator << std::flush;
+					}
 					break;
 				case 'i': // Prints a newline
-					std::cout << std::endl;
+					if (!DEBUGF) std::cout << std::endl;
 					break;
 				
 				//Strings
@@ -611,7 +632,12 @@ int main(int argc, char *argv[])
 					error(line, col, "Unrecognised token");
 			}
 			if (DEBUGF && c != '\n' && c != ' ' && c != '\t') {
-				printf("Character: %c\nAccum Count \n%5ld %5ld\nSrc: \"%s\"\nDest: \"%s\"\nList:\n", c, accumulator, counter, stringSrc.c_str(), stringDest.c_str());
+				std::cout << "Accum Count" << std::endl;
+				printf("%5ld %5ld", accumulator, counter); std::endl(std::cout);
+				std::cout << "Src: \"" << stringSrc << "\"" << std::endl;
+				std::cout << "Dest: \"" << stringDest << "\"" << std::endl;
+				
+				std::cout << "List:" << std::endl;
 				for (std::string item : stringList) {
 					std::cout << '\t' << (item == "" ? "(Empty)" : item) << std::endl;
 				}
