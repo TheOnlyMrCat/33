@@ -62,6 +62,7 @@ enclosing a string in double quotes (`""`), and the destination by single quotes
 * `j`: Sets the accumulator to the value of a character in the source string, referenced by the counter
 * `k`: Sets a character in the destination string, referenced by the counter, to the character represented by the value in the accumulator.
 	* Note: if the destination string isn't long enough to accommodate this character, any extra space is filled in with space characters (` `).
+* `e`: Appends the source string to the destination string
 
 ### Lists
 There are two list registers. One that you can perform operations on, and one for simply storing a second list. The list is initially filled in with `argv`
