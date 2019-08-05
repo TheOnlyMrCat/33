@@ -89,7 +89,7 @@ Conditional operators skip the next operation if the condition is not met.
 ### Functions
 Functions use the string registers to create and call. The destination register is queried when creating a function, and the source
 when calling. Creating a function is as simple as setting the destination register, then enclosing a block of code in braces, for
-example: `'Print'{"Hello, World!'p}`.
+example: `'Print'{"Hello, World!"p}`.
 
 To call a function, you must set the source register, then perform the `q` operation. Following on from the previous example, that
 would be: `"Print"q`.
