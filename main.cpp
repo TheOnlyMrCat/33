@@ -213,18 +213,18 @@ int main(int argc, char *argv[])
 				//Input
 				case 'P':
 					{
-						if (DEBUGF) std::cout << "Input: " << std::endl;
+						if (DEBUGF) std::cout << "Input: ";
 						char c;
 						std::cin >> c;
 						accumulator = c;
 					}
 					break;
 				case 'O':
-					if (DEBUGF) std::cout << "Input: " << std::endl;
+					if (DEBUGF) std::cout << "Input: ";
 					std::cin >> accumulator;
 					break;
 				case 'I':
-					if (DEBUGF) std::cout << "Input: " << std::endl;
+					if (DEBUGF) std::cout << "Input: ";
 					std::getline(std::cin, stringDest);
 					break;
 					
